@@ -91,9 +91,9 @@ The [log_json_path.json](./sample_data/log_json_path.json) file is used when loa
 
 ---
 
-### Create IAC to create and remove all of infras
+### IAC to create and remove all of infras
 
-- We use note to create/remove IAM Role and RedShift cluster. With [iac.py](iac.py) and config file [iac.cfg](iac.cfg).
+- With Notebook and [iac.py](iac.py) and config file [iac.cfg](iac.cfg) to create/remove IAM Role and RedShift cluster easily.
 
 | <img alt="iac.cfg" src="./images/iac_cfg.png" width=35% height=35%> |
 | :-----------------------------------------------------------------: |
