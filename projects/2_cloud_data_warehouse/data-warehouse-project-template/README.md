@@ -8,7 +8,7 @@ In the project 2 - Data Warehouse, we'll build an ETL pipeline for a database ho
 
 The music streaming startup Sparkify has grown their user base and song database and want to move their processes and data onto the cloud. Their data resides in S3, in a directory of JSON logs on user activity on the app, as well as a directory with JSON metadata on the songs in their app.
 
-The Goal of our project is building an ETL pipeline that extracts their data from S3, stages them in Redshift, and transforms data into a set of dimensional tables for their analytics team to continue finding insights into what songs their users are listening to.
+The Goal of our project is building an ETL pipeline that extracts their data from S3, stages them in Redshift then transforms data into a set of dimensional tables for their analytics team to continue finding insights into what songs their users are listening to.
 
 | <img alt="System Architecture - AWS S3 to RedShift ETL" src="./images/system_architecture.png" width=75% height=75%> |
 | :------------------------------------------------------------------------------------------------------------------: |
@@ -93,7 +93,7 @@ The [log_json_path.json](./sample_data/log_json_path.json) file is used when loa
 
 ### Create IAC to create and remove all of infras
 
-- We use note to create/remove IAM Role and RedShift cluster. With [iac/iac.ipynb](./iac/iac.ipynb) and config file [iac/iac.cfg](./iac/iac.cfg).
+- We use note to create/remove IAM Role and RedShift cluster. With [iac.py](iac.py) and config file [iac.cfg](iac.cfg).
 
 | <img alt="iac.cfg" src="./images/iac_cfg.png" width=35% height=35%> |
 | :-----------------------------------------------------------------: |
@@ -148,7 +148,43 @@ Dimension table:
 ### How to run
 
 For the practicing purpose we will use jupyter notebook to run step by step of project processing:
+[data-warehouse-project.ipynb](data-warehouse-project.ipynb)
 
-- Create/Remove cloud IamRole, RedShift cluster by IAC.
-- Create Redshift table
-- Run ETL pipline process
+##### 1. Create cloud IamRole
+
+<img alt="create IamRole" src="./images/create_dwh_role.png" width=75% height=75%>
+
+##### 2. Create RedShift cluster
+
+<img alt="create RedShift" src="./images/create_dwh_redshift_cluster.png" width=75% height=75%>
+
+##### 3. Run create_tables.py
+
+<img alt="createtables" src="./images/run_create_tables.png" width=75% height=75%>
+
+##### 4. Run elp.py
+
+<img alt="etl" src="./images/run_etl.png" width=75% height=75%>
+
+##### 4. Validate Success on RedShift:
+
+- _Top 10 staging_events_  
+  <img alt="staging_events" src="./images/top_10_staging_events.png" width=75% height=75%>
+  ***
+- _Top 10 staging_song_  
+  <img alt="staging_songs" src="./images/top_10_staging_songs.png" width=75% height=75%>
+  ***
+- _Top 10 songplays_  
+  <img alt="songplays" src="./images/top_10_songplays.png" width=75% height=75%>
+  ***
+- _Top 10 songs_  
+  <img alt="staging_songs" src="./images/top_10_songs.png" width=75% height=75%>
+  ***
+- _Top 10 users_  
+  <img alt="staging_users" src="./images/top_10_users.png" width=75% height=75%>
+  ***
+- _Top 10 artists_  
+  <img alt="staging_artists" src="./images/top_10_artists.png" width=75% height=75%>
+  ***
+- _Top 10 time_  
+  <img alt="staging_time" src="./images/top_10_time.png" width=75% height=75%>
