@@ -5,9 +5,15 @@ import configparser
 config = configparser.ConfigParser()
 config.read('dwh.cfg')
 
+ROLE_ARN = config.get('IAM_ROLE', 'ARN')
+
+LOG_DATA = config.get('S3', 'LOG_DATA')
+LOG_JSONPATH = config.get('S3', 'LOG_JSONPATH')
+SONG_DATA = config.get('S3', 'SONG_DATA')
+
 # DROP TABLES
 
-staging_events_table_drop = "DROP TABLE IF EXISTS stg_events"
+staging_events_table_drop = "DROP TABLE IF EXISTS staging_events"
 staging_songs_table_drop = "DROP TABLE IF EXISTS staging_songs"
 songplay_table_drop = "DROP TABLE IF EXISTS songplays"
 user_table_drop = "DROP TABLE IF EXISTS users"
@@ -118,31 +124,153 @@ time_table_create = ("""
 # STAGING TABLES
 
 staging_events_copy = ("""
-""").format()
+    COPY staging_events FROM {}
+    CREDENTIALS 'aws_iam_role={}'
+    REGION 'us-west-2'
+    FORMAT AS JSON 'auto ignorecase'
+""").format(LOG_DATA, ROLE_ARN)
 
 staging_songs_copy = ("""
-""").format()
+    COPY staging_songs FROM {}
+    CREDENTIALS 'aws_iam_role={}'
+    REGION 'us-west-2'
+    FORMAT AS JSON 'auto ignorecase' 
+""").format(SONG_DATA, ROLE_ARN)
 
 # FINAL TABLES
 
 songplay_table_insert = ("""
+    INSERT INTO songplays (
+        start_time,
+        user_id,
+        level,
+        song_id,
+        artist_id,
+        session_id,
+        location,
+        user_agent
+    )
+    SELECT
+        TIMESTAMP 'epoch' + ste.ts/1000 * INTERVAL '1 second' AS start_time,
+        ste.userid,
+        ste.level,
+        sts.song_id,
+        sts.artist_id,
+        ste.sessionid,
+        ste.location,
+        ste.useragent
+    FROM staging_events ste
+        LEFT OUTER JOIN staging_songs sts
+            ON ste.artist = sts.artist_name
+            AND ste.song = sts.title
+    WHERE ste.page = 'NextSong'
 """)
 
 user_table_insert = ("""
+    INSERT INTO users (
+        user_id,
+        first_name,
+        last_name,
+        gender,
+        level
+    )
+    SELECT DISTINCT 
+        userid,
+        firstname,
+        lastname,
+        gender,
+        level
+    FROM staging_events
+    WHERE firstname IS NOT NULL AND lastname IS NOT NULL
 """)
 
 song_table_insert = ("""
+    INSERT INTO songs (
+        song_id,
+        title,
+        artist_id,
+        year,
+        duration
+    )
+    SELECT DISTINCT 
+        song_id,
+        title,
+        artist_id,
+        year,
+        duration
+    FROM staging_songs
 """)
 
 artist_table_insert = ("""
+    INSERT INTO artists (
+        artist_id,
+        name,
+        location,
+        lattitude,
+        longitude
+    )
+    SELECT DISTINCT 
+        artist_id,
+        artist_name,
+        artist_location,
+        artist_latitude,
+        artist_longitude
+    FROM staging_songs
 """)
 
 time_table_insert = ("""
+    INSERT INTO time (
+        start_time,
+        hour,
+        day,
+        week,
+        month,
+        year,
+        weekday
+    )
+    WITH timestamps AS (
+    SELECT DISTINCT
+        TIMESTAMP 'epoch' + ts/1000 * INTERVAL '1 second' AS start_time
+    FROM staging_events)
+    SELECT
+        start_time,
+        extract(hour from start_time),
+        extract(day from start_time),
+        extract(week from start_time),
+        extract(month from start_time),
+        extract(year from start_time),
+        extract(dow from start_time)
+    FROM timestamps
 """)
 
 # QUERY LISTS
 
-create_table_queries = [staging_events_table_create, staging_songs_table_create, songplay_table_create, user_table_create, song_table_create, artist_table_create, time_table_create]
-drop_table_queries = [staging_events_table_drop, staging_songs_table_drop, songplay_table_drop, user_table_drop, song_table_drop, artist_table_drop, time_table_drop]
-copy_table_queries = [staging_events_copy, staging_songs_copy]
-insert_table_queries = [songplay_table_insert, user_table_insert, song_table_insert, artist_table_insert, time_table_insert]
+create_table_queries = { 
+    "staging_events_table_create": staging_events_table_create,
+    "staging_songs_table_create": staging_songs_table_create, 
+    "songplay_table_create": songplay_table_create, 
+    "user_table_create": user_table_create, 
+    "song_table_create": song_table_create, 
+    "artist_table_create": artist_table_create, 
+    "time_table_create": time_table_create 
+}
+drop_table_queries = {
+    "staging_events_table_drop": staging_events_table_drop, 
+    "staging_songs_table_drop": staging_songs_table_drop, 
+    "songplay_table_drop": songplay_table_drop, 
+    "user_table_drop": user_table_drop, 
+    "song_table_drop": song_table_drop, 
+    "artist_table_drop": artist_table_drop, 
+    "time_table_drop": time_table_drop
+}
+copy_table_queries = {
+    "staging_events_copy": staging_events_copy, 
+    "staging_songs_copy": staging_songs_copy
+}
+insert_table_queries = {
+    "songplay_table_insert": songplay_table_insert, 
+    "user_table_insert": user_table_insert, 
+    "song_table_insert": song_table_insert, 
+    "artist_table_insert": artist_table_insert, 
+    "time_table_insert": time_table_insert
+}

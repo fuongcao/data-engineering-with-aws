@@ -4,7 +4,11 @@
 
 ### Project Description
 
-In the project 2 - Data Warehouse, we'll build an ETL pipeline for a database hosted on Redshift. To complete the project, we need to load data from S3 to staging tables on Redshift and execute SQL statements that create the analytics tables from these staging tables.
+In the project 2 - Data Warehouse, we'll build an ETL pipeline for a database hosted on Redshift.
+
+The music streaming startup Sparkify has grown their user base and song database and want to move their processes and data onto the cloud. Their data resides in S3, in a directory of JSON logs on user activity on the app, as well as a directory with JSON metadata on the songs in their app.
+
+The Goal of our project is building an ETL pipeline that extracts their data from S3, stages them in Redshift, and transforms data into a set of dimensional tables for their analytics team to continue finding insights into what songs their users are listening to.
 
 | <img alt="System Architecture - AWS S3 to RedShift ETL" src="./images/system_architecture.png" width=75% height=75%> |
 | :------------------------------------------------------------------------------------------------------------------: |
@@ -70,7 +74,7 @@ The [log_json_path.json](./sample_data/log_json_path.json) file is used when loa
 ##### 1. Create Table Schema
 
 1. Design Schemas for the fact and dimemsion tables.
-2. Write a SQL `CREATE`statement for eachof these tables in [sql_queries.py](sql_queries.py).
+2. Write a SQL `CREATE`statement for each of these tables in [sql_queries.py](sql_queries.py).
 3. Complete the logic in [create_tables.py](create_tables.py) to connect to the database and create these tables.
 4. Write the `DROP` statements to drop the tables in the beginning of [create_tables.py](create_tables.py)if the table aldready exist.This way, we can run [create_tables.py] wheneverwe wantto resetour databaseand test ETL pipeline.
 5. Launch redshift cluster and create a IAM role that has read access to s3.
@@ -87,44 +91,49 @@ The [log_json_path.json](./sample_data/log_json_path.json) file is used when loa
 
 ---
 
-### Process of Project
+### Create IAC to create and remove all of infras
+
+- We use note to create/remove IAM Role and RedShift cluster. With [iac/iac.ipynb](./iac/iac.ipynb) and config file [iac/iac.cfg](./iac/iac.cfg).
+
+| <img alt="iac.cfg" src="./images/iac_cfg.png" width=35% height=35%> |
+| :-----------------------------------------------------------------: |
+|                       _config file `iac.cfg`_                       |
 
 ---
 
-#### 1.1 Design Schemas for the fact and dimemsion tables.
+### Schema for Song Play Analysis.
 
-The
-Star schemas for Sparikfy for Song play data that tructured by a fact table and 4 dimension tables
+Using the song and event datasets, we'll need to create a star schema optimized for queries on song play analysis. This includes the following tables.
 
 Fact table:
 
-> _songplays_: provide the event data associated wit song plays records.
+> 1. _songplays_: records in event data associated with song plays i.e. records with page `NextSong`
 >
 > ```
-> Columns: songplay_id, user_id, session_id, song_id, artist_id, start_time, level, location, user_agent
+> Columns: songplay_id, start_time, user_id, level, song_id, artist_id, session_id, location, user_agent
 > ```
 
 Dimension table:
 
-> _users_: provide the users in the app records.
+> 1. _users_ - users in the app.
 >
 > ```
 > Columns: user_id, first_name, last_name, gender, level
 > ```
 
-> _songs_: provide the songs in music database records .
+> 2. _songs_ - songs in music databas
 >
 > ```
 > Columns: song_id, title, artist_id, year, duration
 > ```
 
-> _artists_: provide the artists in music database records.
+> 3.  _artists_ - artists in music database
 >
 > ```
 > Columns: artist_id, name, location, lattitude, longitude
 > ```
 
-> _time_: provide the timestamps records in songplays broken down into specific unit.
+> 4. _time_ - timestamps of records in songplays broken down into specific units
 >
 > ```
 > Columns: start_time, hour, day, week, month, year, weekday
@@ -136,4 +145,10 @@ Dimension table:
 
 ---
 
-#### 1.2 Write a SQL CREATEstatement for eachof these tables in sql_queries.py
+### How to run
+
+For the practicing purpose we will use jupyter notebook to run step by step of project processing:
+
+- Create/Remove cloud IamRole, RedShift cluster by IAC.
+- Create Redshift table
+- Run ETL pipline process

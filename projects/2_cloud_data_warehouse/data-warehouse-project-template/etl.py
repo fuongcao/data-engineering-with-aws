@@ -1,18 +1,24 @@
 import configparser
 import psycopg2
+import time
 from sql_queries import copy_table_queries, insert_table_queries
-
 
 def load_staging_tables(cur, conn):
     for query in copy_table_queries:
-        cur.execute(query)
+        start_time = time.time()
+        print("executing query \"{}\"".format(query))
+        cur.execute(copy_table_queries[query])
         conn.commit()
+        print("query \"{}\" was commited - excution time {}".format(query, (time.time() - start_time)))
 
 
 def insert_tables(cur, conn):
     for query in insert_table_queries:
-        cur.execute(query)
+        start_time = time.time()
+        print("executing query \"{}\"".format(query))
+        cur.execute(insert_table_queries[query])
         conn.commit()
+        print("query \"{}\" was commited - excution time {}".format(query, (time.time() - start_time)))
 
 
 def main():
