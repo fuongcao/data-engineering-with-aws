@@ -76,12 +76,12 @@ Size of customer_trusted: 482 rows
 Size of accelerometer_trusted: 40,981 rows
 ![accelerometer_trusted_record](images/accelerometer_trusted_record.png)
 
+## 3. Curated Zone
+
 ### [customer_trusted_to_curated.py](./glue_py/customer_trusted_to_curated.py)
 
 Size of customer_curated: 482 rows (means all customers have accelerometer data)
 ![customer_curated_record](images/customer_curated_record.png)
-
-## 3. Curated Zone
 
 ### [step_trainer_trusted.py](./glue_py/step_trainer_trusted.py)
 
