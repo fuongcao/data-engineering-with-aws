@@ -69,7 +69,7 @@ The customer_landing data contains multiple rows with a blank shareWithResearchA
 ### [customer_landing_to_trusted.py](./glue_py/customer_landing_to_trusted.py)
 
 Size of customer_trusted: 482 rows
-![customer_trusted_record](images/customer_trusted_record.png)
+![customer_trusted_record](images/customer_trusted_record_check.png)
 
 ### [accelerometer_landing_to_trusted.py](./glue_py/accelerometer_landing_to_trusted.py)
 
